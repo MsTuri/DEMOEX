@@ -1,0 +1,68 @@
+ISP
+vtysh
+conf t
+do sho run
+ip forwarding
+ipv6 forwarding
+do wri /записать
+ex
+sysctl -a | grep forward /посмотреть существующий форвардинг
+nano /etc/net/sysctl.conf
+Здесь у первой строки поменять значение с 0 на 1
+systemctl restart NetworkManager
+systemctl restart frr.service
+
+-------------------------------------------------
+HQ-SRV
+hostnamectl set-hostname HQ-SRV; exec bash
+
+------------------------------------------------
+nano /etc/frr/daemons /включение оспф и оспф6, написать ес
+systemctl start frr
+systemctl enable frr
+Vtysh
+Conf t
+Interface ether...
+ip add ( ip/maska)
+
+router ospf
+network 10.10.11.n area 0 /не забывать 
+do wri
+
+не забывать сохранять и рестартать
+Если что-то не работает, проверяй
+1) адреса
+2) рестартай менеджеры
+3) все ли шаги выполнены
+
+Настройка dhcp
+на eth1
+ip address 192.168.2.1/25(27)
+do wri
+ex
+systemctl restart frr.service 
+nano /etc/dhcp/dhcpd.conf
+	option domain-name "n";
+	option domain-name-servers 192.168.2.1;
+
+	default-lease-time 6000;
+	max-lease-time 72000;
+
+	authoritative;
+
+	subnet 192.168.2.0 netmask 255.255.255.128{
+		option routers 192.168.2.1;
+		range 192.168.2.2;
+	}
+
+host HQ-Serv
+{
+	hardware ethernet /mac/;
+	fixed-address 192.168.2.2;
+}
+nano /etc/sysconfig/dhcpd
+	DHCPDAERGS=eth1
+
+systemctl restart dhcpd
+
+id /н/ посмотреть пользователя
